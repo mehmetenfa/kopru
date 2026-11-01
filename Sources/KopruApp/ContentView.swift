@@ -12,6 +12,7 @@ struct ContentView: View {
             Divider()
             statusBar
         }
+        .sheet(isPresented: $m.showGuide) { NewComputerGuide().environmentObject(m) }
     }
 
     private var browser: some View {
@@ -118,12 +119,20 @@ struct DeviceListView: View {
                     VStack(spacing: 8) {
                         Image(systemName: "desktopcomputer").font(.system(size: 40)).foregroundStyle(.secondary)
                         Text("Henüz kayıtlı cihaz yok").font(.headline)
-                        Text("Yukarıdaki kutuya kullanıcı@sunucu yaz ve Bağlan'a bas. Bağlandıktan sonra cihaz burada listelenir, bir dahaki sefere tek tıkla bağlanırsın.")
+                        Text("Adım adım rehberle bir Windows bilgisayarı ekle. Bağlandıktan sonra cihaz burada listelenir, bir dahaki sefere tek tıkla bağlanırsın.")
                             .font(.callout).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                        Button { m.showGuide = true } label: { Label("Yeni bilgisayar ekle…", systemImage: "plus.circle.fill") }
+                            .buttonStyle(.borderedProminent).controlSize(.large)
+                        Text("Bilgileri zaten biliyorsan yukarıdaki kutuya kullanıcı@sunucu yazıp Bağlan'a basabilirsin.")
+                            .font(.caption).foregroundStyle(.tertiary)
                     }.frame(maxWidth: .infinity).padding(.top, 60).padding(.horizontal, 40)
                 }
                 if !m.devices.isEmpty {
-                    Text("Cihazlarım").font(.headline)
+                    HStack {
+                        Text("Cihazlarım").font(.headline)
+                        Spacer()
+                        Button { m.showGuide = true } label: { Label("Yeni bilgisayar ekle…", systemImage: "plus.circle") }
+                    }
                     ForEach(m.devices) { DeviceRow(device: $0, saved: true) }
                 }
                 if !m.suggestions.isEmpty {

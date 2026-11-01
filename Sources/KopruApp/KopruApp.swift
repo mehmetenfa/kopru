@@ -31,6 +31,9 @@ struct MenuContent: View {
     var body: some View {
         Text(m.connected ? "● Bağlı: \(m.displayName(for: m.host))" : "○ Bağlı değil")
         Divider()
+        Button("Yeni bilgisayar ekle…") {
+            openWindow(id: "main"); NSApp.activate(ignoringOtherApps: true); m.showGuide = true
+        }
         Button("Köprü penceresini aç") {
             openWindow(id: "main"); NSApp.activate(ignoringOtherApps: true)
         }

@@ -7,7 +7,7 @@ public typealias ProgressHandler = @Sendable (TransferProgress) -> Void
 /// SHA-256 doğrulama, tamamlanınca yerine taşıma (adı çakışırsa "ad (2)").
 public extension SSHSession {
     private var rsyncShell: String {
-        "/usr/bin/ssh -o ControlMaster=no -o ControlPath=\(controlPath) -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=3"
+        "/usr/bin/ssh -o ControlMaster=no -o ControlPath=\(controlPath) -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=15 -o ServerAliveCountMax=3"
     }
 
     func isRemoteDirectory(_ path: String) async throws -> Bool {

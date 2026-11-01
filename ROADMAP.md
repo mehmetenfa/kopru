@@ -6,7 +6,10 @@
 - [x] Pano: Windows → Mac (metin, görsel PNG), Mac → Windows (metin)
 - [x] `kopru` CLI (ls/get/put/run/clip)
 
-## v0.3.1 — Cihaz listesi (kodlandı, elle denenmedi; henüz yayınlanmadı)
+## v0.3.1 — Cihaz listesi + yeni bilgisayar rehberi (kodlandı, arayüz elle denenmedi; henüz yayınlanmadı)
+- [x] "Yeni bilgisayar ekle" rehberi: Tailscale ya da aynı ağ yöntemi, kopyalanabilir komutlar, bağlantı tanılaması (Türkçe hata açıklamaları), kaydet ve bağlan
+- [x] İlk bağlantıda sunucu anahtarı otomatik kabul (StrictHostKeyChecking=accept-new); `kopru <host> check`
+- [x] ssh seçeneği gibi görünen adresler reddedilir (-o...)
 - [x] Bağlanılan cihazlar kendiliğinden kaydedilir; bağlı değilken listede, her birinin yanında "Bağlan" düğmesi
 - [x] Yeniden adlandır / listeden sil; son bağlantı zamanı; ~/.ssh/config sunucuları öneri olarak
 - [x] Menü çubuğundan tek tıkla bağlan

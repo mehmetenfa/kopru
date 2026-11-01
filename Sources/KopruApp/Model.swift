@@ -40,6 +40,18 @@ final class Model: ObservableObject {
         if let data = try? JSONEncoder().encode(devices) { UserDefaults.standard.set(data, forKey: "devices") }
     }
 
+    @Published var showGuide = false
+
+    /// Rehberden: cihazı kaydet (isteğe bağlı adla) ve bağlan
+    func addAndConnect(host raw: String, name: String) {
+        let h = SSHSession.normalizeHost(raw)
+        guard !h.isEmpty else { return }
+        var list = Device.remembering(h, in: devices)
+        if !name.isEmpty, let i = list.firstIndex(where: { $0.host == h }) { list[i].name = name }
+        devices = list; saveDevices()
+        host = h; connect()
+    }
+
     func connect(to device: Device) { host = device.host; connect() }
 
     func forget(_ device: Device) { devices.removeAll { $0.host == device.host }; saveDevices() }

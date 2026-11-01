@@ -66,3 +66,26 @@ final class DeviceTests: XCTestCase {
         XCTAssertEqual(try JSONDecoder().decode([Device].self, from: JSONEncoder().encode(d)), d)
     }
 }
+
+final class ConnectionCheckTests: XCTestCase {
+    func testTailnetPolicy() {
+        let e = ConnectionCheck.explain(stderr: "tailscale: tailnet policy does not permit you to SSH as user \"ssh x\"\nConnection closed by 100.1.2.3 port 22")
+        XCTAssertTrue(e.title.contains("izin"))
+    }
+    func testTailscaleApprovalLink() {
+        let s = "# Tailscale SSH requires an additional check.\n# To authenticate, visit: https://login.tailscale.com/a/l1450021f3081a5\n"
+        let e = ConnectionCheck.explain(stderr: s, timedOut: true)
+        XCTAssertEqual(e.link?.absoluteString, "https://login.tailscale.com/a/l1450021f3081a5")
+    }
+    func testCommonErrors() {
+        XCTAssertTrue(ConnectionCheck.explain(stderr: "u@h: Permission denied (publickey).").title.contains("anahtar"))
+        XCTAssertEqual(ConnectionCheck.explain(stderr: "ssh: Could not resolve hostname foo: nodename nor servname provided, or not known").title, "Adres bulunamadı")
+        XCTAssertTrue(ConnectionCheck.explain(stderr: "ssh: connect to host 1.2.3.4 port 22: Connection refused").title.contains("SSH sunucusu"))
+        XCTAssertTrue(ConnectionCheck.explain(stderr: "ssh: connect to host 1.2.3.4 port 22: Operation timed out").title.contains("ulaşılamıyor"))
+        XCTAssertTrue(ConnectionCheck.explain(stderr: "'eval' is not recognized as an internal or external command").title.contains("WSL"))
+    }
+    func testHostCannotBeAnOption() {
+        XCTAssertEqual(SSHSession.normalizeHost("-oProxyCommand=evil"), "")
+        XCTAssertEqual(SSHSession.normalizeHost("ssh a@b"), "a@b")
+    }
+}

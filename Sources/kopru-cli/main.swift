@@ -12,6 +12,7 @@ kopru — Mac'ten SSH ile Windows'a kayıpsız erişim
   kopru <host> get <uzak-yol> [hedef]  İndir (devam eder, SHA-256 doğrulamalı, Ctrl-C iptal)
   kopru <host> put <yerel> <uzak-klasör>  Yükle (SHA-256 doğrulamalı)
   kopru <host> run "<bash>"            WSL'de komut çalıştır, çıktısı stdout'a (| pbcopy ile panoya)
+  kopru <host> check                   Bağlantıyı ve gereksinimleri denetle (yeni bilgisayar için)
   kopru <host> disconnect              Kalıcı ssh bağlantısını kapat
   kopru <host> clip [pull|push]        Windows panosunu al / Mac panosunu gönder
 """
@@ -21,6 +22,17 @@ guard let first = a.first else { print(usage); exit(0) }
 if first == "hosts" { SSHConfig.hostAliases().forEach { print($0) }; exit(0) }
 guard a.count >= 2 else { print(usage); exit(1) }
 
+if a.count >= 2, a[1] == "check" {
+    let sem = DispatchSemaphore(value: 0)
+    Task {
+        let r = await ConnectionCheck.run(host: first)
+        print(r.title); r.items.forEach { print(($0.ok ? "  ✓ " : "  ✗ ") + $0.text) }
+        if !r.hint.isEmpty { print("  → " + r.hint) }
+        if let l = r.link { print("  → " + l.absoluteString) }
+        exit(r.usable ? 0 : 1)
+    }
+    sem.wait()
+}
 let s = SSHSession(host: first)
 let cmd = a[1]
 let rest = Array(a.dropFirst(2))

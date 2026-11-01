@@ -15,7 +15,8 @@ public final class SSHSession {
     public static func normalizeHost(_ raw: String) -> String {
         var parts = raw.split(whereSeparator: \.isWhitespace).map(String.init)
         if parts.first == "ssh" { parts.removeFirst() }
-        return parts.last ?? ""
+        let h = parts.last ?? ""
+        return h.hasPrefix("-") ? "" : h   // "-o..." gibi değerler ssh seçeneği olarak yorumlanmasın
     }
 
     public init(host: String) {
@@ -29,7 +30,7 @@ public final class SSHSession {
 
     var sshOptions: [String] {
         ["-o", "ControlMaster=no", "-o", "ControlPath=\(controlPath)",
-         "-o", "BatchMode=yes", "-o", "ServerAliveInterval=15", "-o", "Compression=no"]
+         "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=accept-new", "-o", "ServerAliveInterval=15", "-o", "Compression=no"]
     }
 
     private actor Gate {
@@ -60,7 +61,7 @@ public final class SSHSession {
             let p = Process()
             p.executableURL = URL(fileURLWithPath: "/usr/bin/ssh")
             p.arguments = ["-MNf", "-o", "ControlPath=\(cp)", "-o", "ControlPersist=10m", "-o", "BatchMode=yes",
-                           "-o", "ServerAliveInterval=15", host]
+                           "-o", "StrictHostKeyChecking=accept-new", "-o", "ServerAliveInterval=15", host]
             p.standardOutput = h; p.standardError = h; p.standardInput = FileHandle.nullDevice
             try p.run(); p.waitUntilExit()
             try? h.close()
