@@ -10,6 +10,13 @@ final class Model: ObservableObject {
     @Published var items: [RemoteItem] = []
     @Published var status = "Hazır"
     @Published var busy = false
+    @Published var progress: TransferProgress?
+    @Published var verify = true
+    private var currentTask: Task<Void, Never>?
+    private var activity: NSObjectProtocol?
+
+    func cancel() { currentTask?.cancel() }
+    private var report: ProgressHandler { { [weak self] p in Task { @MainActor in self?.progress = p } } }
 
     private var cached: SSHSession?
     private var sess: SSHSession {
@@ -33,8 +40,9 @@ final class Model: ObservableObject {
     func download(_ item: RemoteItem) {
         let dir = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
         run("\(item.name) indiriliyor…") {
-            let u = try await self.sess.download(remote: item.path, toDirectory: dir, isDirectory: item.isDirectory)
-            self.status = "✓ \(u.lastPathComponent) indirildi, doğrulandı"
+            let u = try await self.sess.download(remote: item.path, toDirectory: dir, isDirectory: item.isDirectory,
+                                                 verify: self.verify, onProgress: self.report)
+            self.status = "✓ \(u.lastPathComponent) indirildi" + (self.verify && !item.isDirectory ? ", doğrulandı" : "")
             NSWorkspace.shared.activateFileViewerSelecting([u])
         }
     }
@@ -42,8 +50,8 @@ final class Model: ObservableObject {
     func upload(_ urls: [URL]) {
         guard !cwd.isEmpty else { return }
         run("Yükleniyor…") {
-            for u in urls { try await self.sess.upload(local: u, toRemoteDirectory: self.cwd) }
-            self.status = "✓ \(urls.count) öğe yüklendi, doğrulandı"
+            for u in urls { try await self.sess.upload(local: u, toRemoteDirectory: self.cwd, verify: self.verify, onProgress: self.report) }
+            self.status = "✓ \(urls.count) öğe yüklendi" + (self.verify ? ", doğrulandı" : "")
             self.open(self.cwd)
         }
     }
@@ -76,10 +84,16 @@ final class Model: ObservableObject {
     }
 
     private func run(_ message: String, _ work: @escaping () async throws -> Void) {
-        busy = true; status = message
-        Task {
-            do { try await work() } catch { status = "❌ \(error.localizedDescription)" }
-            busy = false
+        busy = true; status = message; progress = nil
+        // Uzun aktarımlarda Mac uykuya geçmesin
+        activity = ProcessInfo.processInfo.beginActivity(options: [.idleSystemSleepDisabled, .userInitiated], reason: "Köprü aktarımı")
+        currentTask = Task {
+            do { try await work() }
+            catch is CancellationError {
+                status = "İptal edildi. Yarım dosya korundu; aynı aktarımı yeniden başlatınca kaldığı yerden devam eder."
+            } catch { status = "❌ \(error.localizedDescription)" }
+            busy = false; progress = nil
+            if let a = activity { ProcessInfo.processInfo.endActivity(a); activity = nil }
         }
     }
 }

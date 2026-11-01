@@ -6,12 +6,12 @@ let package = Package(
     platforms: [.macOS(.v13)],
     products: [
         .library(name: "KopruCore", targets: ["KopruCore"]),
-        .executable(name: "Kopru", targets: ["Kopru"]),
+        .executable(name: "KopruApp", targets: ["KopruApp"]),
         .executable(name: "kopru", targets: ["kopru-cli"]),
     ],
     targets: [
         .target(name: "KopruCore"),
-        .executableTarget(name: "Kopru", dependencies: ["KopruCore"]),
+        .executableTarget(name: "KopruApp", dependencies: ["KopruCore"]),
         .executableTarget(name: "kopru-cli", dependencies: ["KopruCore"]),
         .testTarget(name: "KopruCoreTests", dependencies: ["KopruCore"]),
     ]

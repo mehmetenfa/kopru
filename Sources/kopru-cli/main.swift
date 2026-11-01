@@ -9,7 +9,7 @@ kopru — Mac'ten SSH ile Windows'a kayıpsız erişim
 
   kopru hosts                          ~/.ssh/config içindeki sunucular
   kopru <host> ls [yol]                Windows klasörünü listele
-  kopru <host> get <uzak-yol> [hedef]  İndir (SHA-256 doğrulamalı)
+  kopru <host> get <uzak-yol> [hedef]  İndir (devam eder, SHA-256 doğrulamalı, Ctrl-C iptal)
   kopru <host> put <yerel> <uzak-klasör>  Yükle (SHA-256 doğrulamalı)
   kopru <host> run "<bash>"            WSL'de komut çalıştır, çıktısı stdout'a (| pbcopy ile panoya)
   kopru <host> clip [pull|push]        Windows panosunu al / Mac panosunu gönder
@@ -24,7 +24,12 @@ let s = SSHSession(host: first)
 let cmd = a[1]
 let rest = Array(a.dropFirst(2))
 
-Task {
+func printProgress(_ p: TransferProgress) {
+    let pct = p.phase == .transferring ? String(format: "%3.0f%% ", p.fraction * 100) : ""
+    FileHandle.standardError.write(Data(("\r\u{1B}[K" + pct + p.summary).utf8))
+}
+
+let mainTask = Task {
     do {
         switch cmd {
         case "ls":
@@ -34,12 +39,14 @@ Task {
         case "get":
             guard let r = rest.first else { fail(usage) }
             let dir = URL(fileURLWithPath: rest.count > 1 ? rest[1] : FileManager.default.currentDirectoryPath)
-            let isDir = (try? await s.list(r)) != nil
-            let u = try await s.download(remote: r, toDirectory: dir, isDirectory: isDir)
+            let isDir = try await s.isRemoteDirectory(r)
+            let u = try await s.download(remote: r, toDirectory: dir, isDirectory: isDir, onProgress: printProgress)
+            FileHandle.standardError.write(Data("\r\u{1B}[K".utf8))
             print("✓ \(u.path)")
         case "put":
             guard rest.count >= 2 else { fail(usage) }
-            try await s.upload(local: URL(fileURLWithPath: rest[0]), toRemoteDirectory: rest[1])
+            try await s.upload(local: URL(fileURLWithPath: rest[0]), toRemoteDirectory: rest[1], onProgress: printProgress)
+            FileHandle.standardError.write(Data("\r\u{1B}[K".utf8))
             print("✓ yüklendi")
         case "run":
             guard let script = rest.first else { fail(usage) }
@@ -60,6 +67,13 @@ Task {
         default: print(usage)
         }
         exit(0)
-    } catch { fail("Hata: \(error.localizedDescription)") }
+    } catch is CancellationError {
+        fail("\nİptal edildi. Yarım dosya korundu; aynı komutu tekrar çalıştırınca kaldığı yerden devam eder.")
+    } catch { fail("\nHata: \(error.localizedDescription)") }
 }
+// Ctrl-C: aktarımı düzgünce iptal et (yarım dosya devam için saklanır)
+signal(SIGINT, SIG_IGN)
+let sigSrc = DispatchSource.makeSignalSource(signal: SIGINT, queue: .main)
+sigSrc.setEventHandler { mainTask.cancel() }
+sigSrc.resume()
 RunLoop.main.run()

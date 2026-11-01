@@ -44,31 +44,6 @@ public extension SSHSession {
         let r = try await sh("sha256sum -- \(Self.shq(path))")
         return String(r.text.split(separator: " ").first ?? "").lowercased()
     }
-
-    /// Dosyayı bayt bayt indirir; tek dosyada SHA-256 ile doğrular. Klasörler özyinelemeli iner.
-    func download(remote: String, toDirectory dir: URL, isDirectory: Bool = false, verify: Bool = true) async throws -> URL {
-        try await scp((isDirectory ? ["-r"] : []) + ["\(host):\(remote)", dir.path])
-        let local = dir.appendingPathComponent((remote as NSString).lastPathComponent)
-        if verify && !isDirectory {
-            async let l = Hashing.sha256(of: local)
-            async let r = remoteSHA256(remote)
-            let (lh, rh) = try await (l, r)
-            if lh != rh { throw KopruError.hashMismatch(local: lh, remote: rh) }
-        }
-        return local
-    }
-
-    func upload(local: URL, toRemoteDirectory dir: String, verify: Bool = true) async throws {
-        var isDir: ObjCBool = false
-        FileManager.default.fileExists(atPath: local.path, isDirectory: &isDir)
-        try await scp((isDir.boolValue ? ["-r"] : []) + [local.path, "\(host):\(dir)/"])
-        if verify && !isDir.boolValue {
-            async let l = Hashing.sha256(of: local)
-            async let r = remoteSHA256(dir + "/" + local.lastPathComponent)
-            let (lh, rh) = try await (l, r)
-            if lh != rh { throw KopruError.hashMismatch(local: lh, remote: rh) }
-        }
-    }
 }
 
 public enum Hashing {

@@ -13,6 +13,7 @@ struct ContentView: View {
                     Menu("Kayıtlı") { ForEach(m.hosts, id: \.self) { h in Button(h) { m.host = h } } }.fixedSize()
                 }
                 Button("Bağlan") { m.open(nil) }.disabled(m.host.isEmpty || m.busy)
+                Toggle("SHA-256 doğrula", isOn: $m.verify).toggleStyle(.checkbox).help("Aktarım sonrası dosya iki tarafta okunup karşılaştırılır. Çok büyük dosyalarda biraz zaman alır.")
                 Spacer()
                 Menu("Pano") {
                     Button("Windows panosunu al") { m.pullClipboard() }
@@ -45,7 +46,19 @@ struct ContentView: View {
                 return true
             }
             Divider()
-            HStack { if m.busy { ProgressView().controlSize(.small) }; Text(m.status).font(.caption); Spacer() }.padding(8)
+            VStack(alignment: .leading, spacing: 4) {
+                if let p = m.progress {
+                    HStack {
+                        if p.phase == .transferring { ProgressView(value: p.fraction) } else { ProgressView().progressViewStyle(.linear) }
+                        if p.phase == .transferring { Text(String(format: "%.0f%%", p.fraction * 100)).font(.caption.monospacedDigit()) }
+                        Button("İptal") { m.cancel() }
+                    }
+                    Text(p.summary).font(.caption).foregroundStyle(.secondary)
+                } else if m.busy {
+                    HStack { ProgressView().controlSize(.small); Button("İptal") { m.cancel() } }
+                }
+                Text(m.status).font(.caption).lineLimit(2)
+            }.padding(8)
         }
     }
 }

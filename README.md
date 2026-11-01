@@ -10,6 +10,9 @@ Mac'ten SSH ile bağlandığınız Windows bilgisayardan **kayıpsız ve hızlı
 - Windows panosunu Mac'e alın (metin, görseller PNG olarak sıkıştırmasız), Mac panosunu Windows'a gönderin
 - `kopru` komut satırı: `kopru kullanici@pc run "ls -la" | pbcopy`
 
+## Büyük dosyalar
+GB'larca dosyalar için tasarlandı: ilerleme/hız/kalan süre gösterilir, iptal edilebilir, bağlantı koparsa otomatik yeniden denenir ve yarım kalan aktarım **kaldığı yerden** devam eder (yarım dosya hedef klasörde gizli `.kopru-partial` içinde saklanır). Başlamadan önce iki tarafta boş alan kontrol edilir.
+
 ## Gereksinimler
 - macOS 13+, anahtar tabanlı (parolasız) SSH ile erişilen, WSL2 kurulu bir Windows PC
 - WSL'de `sha256sum` (varsayılan) ve Windows interop açık (varsayılan)

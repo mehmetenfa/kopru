@@ -25,21 +25,27 @@ public final class SSHSession {
     }
 
     private actor Gate {
-        var task: Task<Void, Error>?
+        var inflight: Task<Void, Error>?
         func run(_ work: @escaping @Sendable () async throws -> Void) async throws {
-            if task == nil { task = Task { try await work() } }
-            do { try await task!.value } catch { task = nil; throw error }
+            if let t = inflight { return try await t.value }
+            let t = Task { try await work() }
+            inflight = t
+            defer { inflight = nil }
+            try await t.value
         }
     }
     private let gate = Gate()
 
-    /// Kalıcı ana bağlantıyı (ControlMaster) başlatır. Çıktısı boru yerine dosyaya gider:
-    /// arka planda kalan ssh süreci boruyu açık tutup okumayı sonsuza dek bekletmesin diye.
+    /// Kalıcı ana bağlantıyı (ControlMaster) güvence altına alır; koptuysa yeniden kurar.
+    /// Ana süreç çıktısı boru yerine dosyaya gider: arka planda kalan ssh süreci boruyu açık tutup
+    /// okumayı sonsuza dek bekletmesin diye.
     func ensureMaster() async throws {
         let host = self.host, cp = controlPath
+        let check = try await runProcess("/usr/bin/ssh", ["-o", "ControlPath=\(cp)", "-O", "check", host])
+        if check.status == 0 { return }
         try await gate.run {
-            let check = try await runProcess("/usr/bin/ssh", ["-o", "ControlPath=\(cp)", "-O", "check", host])
-            if check.status == 0 { return }
+            let again = try await runProcess("/usr/bin/ssh", ["-o", "ControlPath=\(cp)", "-O", "check", host])
+            if again.status == 0 { return }
             let log = URL(fileURLWithPath: NSTemporaryDirectory() + "kopru-master-\(getpid()).log")
             FileManager.default.createFile(atPath: log.path, contents: nil)
             let h = try FileHandle(forWritingTo: log)
@@ -81,6 +87,19 @@ public final class SSHSession {
 
     /// Kabuk için tek tırnaklı kaçış
     public static func shq(_ s: String) -> String { "'" + s.replacingOccurrences(of: "'", with: "'\\''") + "'" }
+
+    /// Yalnızca ASCII üretir: ASCII dışı baytlar $'\ooo' olarak kaçırılır. Foundation'ın Process argümanlarında
+    /// macOS dosya sistemi gibi Unicode'u ayrıştırması (ö → o + ¨) uzak yolu bozmasın diye rsync'e böyle verilir.
+    public static func shqASCII(_ s: String) -> String {
+        var out = "", run = ""
+        func flush() { if !run.isEmpty { out += "'" + run.replacingOccurrences(of: "'", with: "'\\''") + "'"; run = "" } }
+        for b in s.utf8 {
+            if b < 0x80 && b >= 0x20 { run.append(Character(UnicodeScalar(b))) }
+            else { flush(); out += "$'\\" + String(format: "%03o", b) + "'" }
+        }
+        flush()
+        return out.isEmpty ? "''" : out
+    }
 
     public func scp(_ args: [String]) async throws {
         try await ensureMaster()

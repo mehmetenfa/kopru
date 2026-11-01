@@ -7,9 +7,12 @@
 - [x] `kopru` CLI (ls/get/put/run/clip)
 
 ## v0.2 — Hız ve güven
-- [ ] İlerleme çubuğu + hız göstergesi, iptal, kuyruk
+- [x] İlerleme çubuğu + hız + kalan süre, iptal, Mac uykuya geçmesin
+- [x] Kesilen aktarımı sürdürme (rsync --append, ara klasör .kopru-partial), otomatik yeniden deneme (6 deneme)
+- [x] Boş alan kontrolü (Mac ve Windows tarafı), ad çakışmasında "ad (2)"
+- [ ] Aktarım kuyruğu (şimdilik tek seferde bir aktarım)
 - [ ] Büyük klasörlerde tek tar akışı (çok sayıda küçük dosya için hızlı)
-- [ ] Kesilen aktarımı sürdürme
+- [ ] Klasörler için hash doğrulaması
 - [ ] Doğrudan Windows OpenSSH (WSL'siz) arka ucu: PowerShell tabanlı listeleme/pano
 - [ ] Tailscale SSH ilk kimlik doğrulama bağlantısını uygulamada göster
 - [ ] Uygulama arayüzünü gerçek kullanımda test et (şu an yalnızca CLI doğrulandı)
