@@ -10,9 +10,11 @@ Mac'ten SSH ile Windows PC'ye kayıpsız dosya/pano/komut erişimi sağlayan aç
 
 ## Kurallar
 - Swift 5 dil modu, macOS 13+. Harici bağımlılık ekleme (sistem `ssh`/`scp` kullanılır).
-- Windows'a kalıcı kurulum yapma; yalnızca %LOCALAPPDATA%\Kopru altında yardımcı dosya.
+- Hedef: SSH ile WSL2'ye (Linux) bağlanılan Windows PC. Windows sürücüleri /mnt/c, /mnt/d; Windows özellikleri `powershell.exe` (WSL interop, tam yol) ile. Windows/WSL'e kalıcı kurulum yapma.
+- Uzak betikler `SSHSession.sh` ile base64 olarak gider (stdin veri için serbest kalır; powershell.exe stdin'i tüketir).
+- ssh ControlMaster süreci boruları açık tutar: master daima dosyaya yönlendirilerek ayrı başlatılır (`ensureMaster`), asla boru ile.
 - Aktarım kayıpsız olmalı: dosyalar bayt bayt kopyalanır, SHA-256 ile doğrulanır. Görseller PNG (yeniden sıkıştırma yok).
-- Windows komutları `powershell -EncodedCommand` ile gönderilir (kaçış sorunlarını önler).
+- PowerShell betikleri `-EncodedCommand` (UTF-16 base64) ile gönderilir.
 - Kullanıcıya dönük metinler Türkçe (ileride yerelleştirme: ROADMAP).
 - Gizli bilgi (anahtar, parola, host IP) repoya girmez.
 

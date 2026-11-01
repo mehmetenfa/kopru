@@ -8,18 +8,15 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                if m.hosts.isEmpty {
-                    TextField("ssh takma adı (~/.ssh/config)", text: $m.host).frame(width: 220)
-                } else {
-                    Picker("Windows", selection: $m.host) { ForEach(m.hosts, id: \.self) { Text($0) } }.frame(width: 240)
+                TextField("kullanıcı@sunucu (ör. ad@misalpc1)", text: $m.host).frame(width: 260).textFieldStyle(.roundedBorder)
+                if !m.hosts.isEmpty {
+                    Menu("Kayıtlı") { ForEach(m.hosts, id: \.self) { h in Button(h) { m.host = h } } }.fixedSize()
                 }
                 Button("Bağlan") { m.open(nil) }.disabled(m.host.isEmpty || m.busy)
                 Spacer()
                 Menu("Pano") {
                     Button("Windows panosunu al") { m.pullClipboard() }
                     Button("Mac panosunu gönder") { m.pushClipboard() }
-                    Divider()
-                    Button("Pano yardımcısını kur (bir kez)") { m.setupClipboard() }
                 }.disabled(m.host.isEmpty || m.busy).fixedSize()
             }.padding(10)
             Divider()
@@ -37,7 +34,7 @@ struct ContentView: View {
                     Button { m.download(item) } label: { Image(systemName: "arrow.down.circle") }.buttonStyle(.borderless).help("Mac'e indir (doğrulamalı)")
                 }
                 .contentShape(Rectangle())
-                .onTapGesture(count: 2) { if item.isDirectory { m.open(item.FullName) } }
+                .onTapGesture(count: 2) { if item.isDirectory { m.open(item.path) } }
             }
             .onDrop(of: [.fileURL], isTargeted: nil) { providers in
                 for p in providers {

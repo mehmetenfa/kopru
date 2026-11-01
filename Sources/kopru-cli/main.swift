@@ -11,9 +11,8 @@ kopru — Mac'ten SSH ile Windows'a kayıpsız erişim
   kopru <host> ls [yol]                Windows klasörünü listele
   kopru <host> get <uzak-yol> [hedef]  İndir (SHA-256 doğrulamalı)
   kopru <host> put <yerel> <uzak-klasör>  Yükle (SHA-256 doğrulamalı)
-  kopru <host> run "<powershell>"      Komut çalıştır, çıktısı stdout'a (| pbcopy ile panoya)
+  kopru <host> run "<bash>"            WSL'de komut çalıştır, çıktısı stdout'a (| pbcopy ile panoya)
   kopru <host> clip [pull|push]        Windows panosunu al / Mac panosunu gönder
-  kopru <host> clip-setup              Pano yardımcısını Windows'a kur (bir kez)
 """
 
 let a = Array(CommandLine.arguments.dropFirst())
@@ -44,19 +43,18 @@ Task {
             print("✓ yüklendi")
         case "run":
             guard let script = rest.first else { fail(usage) }
-            FileHandle.standardOutput.write(try await s.powershell(script).stdout)
-        case "clip-setup":
-            try await s.installClipboardAgent(); print("✓ pano yardımcısı kuruldu")
+            FileHandle.standardOutput.write(try await s.sh(script).stdout)
         case "clip":
+            let pb = NSPasteboard.general
             if rest.first == "push" {
-                let t = NSPasteboard.general.string(forType: .string) ?? ""
-                try await s.pushClipboardText(t); print("✓ Windows panosuna gönderildi")
+                if let png = pb.data(forType: .png) { try await s.pushClipboardImage(png: png) }
+                else { try await s.pushClipboardText(pb.string(forType: .string) ?? "") }
+                print("✓ Windows panosuna gönderildi")
             } else {
                 switch try await s.pullClipboard() {
-                case .text(let t): NSPasteboard.general.clearContents(); NSPasteboard.general.setString(t, forType: .string); print("✓ metin Mac panosunda (\(t.count) karakter)")
-                case .image(let u):
-                    if let img = NSImage(contentsOf: u) { NSPasteboard.general.clearContents(); NSPasteboard.general.writeObjects([img]) }
-                    print("✓ görsel Mac panosunda (PNG, kayıpsız): \(u.path)")
+                case .text(let t): pb.clearContents(); pb.setString(t, forType: .string); print("✓ metin Mac panosunda (\(t.count) karakter)")
+                case .image(let d): pb.clearContents(); pb.setData(d, forType: .png); print("✓ görsel Mac panosunda (PNG, kayıpsız)")
+                case .empty: print("Windows panosu boş")
                 }
             }
         default: print(usage)

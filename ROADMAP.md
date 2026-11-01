@@ -1,6 +1,6 @@
 # Yol haritası
 
-## v0.1 — Temel (kodlandı, Windows'ta test bekliyor)
+## v0.1 — Temel (WSL2 hedefli; gerçek PC'de listeleme/pano/aktarım doğrulandı)
 - [x] ~/.ssh/config'ten sunucu seçimi
 - [x] Uzak klasör gezme, indirme/yükleme (sürükle-bırak), SHA-256 doğrulama
 - [x] Pano: Windows → Mac (metin, görsel PNG), Mac → Windows (metin)
@@ -10,7 +10,9 @@
 - [ ] İlerleme çubuğu + hız göstergesi, iptal, kuyruk
 - [ ] Büyük klasörlerde tek tar akışı (çok sayıda küçük dosya için hızlı)
 - [ ] Kesilen aktarımı sürdürme
-- [ ] Gerçek Windows testleri (10/11, OpenSSH, varsayılan kabuk cmd ve PowerShell)
+- [ ] Doğrudan Windows OpenSSH (WSL'siz) arka ucu: PowerShell tabanlı listeleme/pano
+- [ ] Tailscale SSH ilk kimlik doğrulama bağlantısını uygulamada göster
+- [ ] Uygulama arayüzünü gerçek kullanımda test et (şu an yalnızca CLI doğrulandı)
 
 ## v0.3 — Windows'a özel özellikler
 - [ ] Windows ekran görüntüsü alıp Mac'e getir

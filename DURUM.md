@@ -1,24 +1,26 @@
 # Durum (güncelleme: 2026-11-01)
 
 ## Şu an
-v0.1 iskeleti yazıldı; derleniyor, birim testi geçiyor, `build/Köprü.app` üretiliyor.
+v0.1 çalışıyor. Hedef bilgisayar (`misal_ilim_ve_kltr@misalpc1`, Tailscale SSH) gerçekte **WSL2 (Linux)** içine giriyor; Windows sürücüleri /mnt/c, /mnt/d. Mimari buna göre yeniden yazıldı.
 
-## Yapıldı
-- SwiftPM projesi: KopruCore + Kopru (uygulama) + kopru-cli
-- SSH ControlMaster ile hızlı oturum, PowerShell EncodedCommand
-- Dosya listeleme / indirme / yükleme + SHA-256 doğrulama
-- Pano yardımcısı (zamanlanmış görev /IT ile kullanıcı oturumunda çalışır)
-- Logo ve .app paketleme betiği
-- CLAUDE.md, ROADMAP.md, DURUM.md, README.md, MIT lisans
+## Gerçek PC'de doğrulananlar (CLI ile)
+- Klasör listeleme (Türkçe/boşluklu adlar dahil), Windows kullanıcı klasörünü bulma (powershell.exe + wslpath)
+- Pano Windows → Mac (metin) çalıştı; powershell.exe interop sayesinde ek kurulum yok
+- 100 MB dosya yükleme/indirme: bayt bayt aynı, SHA-256 doğrulaması geçti (~10-13 MB/sn, Tailscale yoluna bağlı)
+- `run` komutu, Türkçe karakterler bozulmadan
 
-## Bilinen riskler / test edilmedi
-- Hiçbir şey gerçek Windows makinede test edilmedi.
-- Pano: sshd servis olarak çalıştığı için görev yaklaşımı varsayıma dayanıyor; kullanıcı oturumu açık olmalı.
-- Mac→Windows pano gönderimi komut satırı sınırı nedeniyle uzun metinde (~20 KB+) başarısız olabilir.
-- Klasör indirmede hash doğrulaması yok (yalnızca tek dosya).
-- Proje adı geçici ("Köprü"); GitHub depo adı ve yayın henüz yok.
+## Test edilmedi
+- SwiftUI arayüzü gerçek kullanımda (derleniyor ve .app üretiliyor ama elle tıklanıp denenmedi)
+- Pano: görsel (PNG) çekme, Mac → Windows gönderme (metin/görsel)
+- Klasör indirme/yükleme; klasörde hash doğrulaması yok
+
+## Öğrenilenler
+- ssh ControlMaster arka plan süreci stdout borusunu açık tutar → okuma sonsuza dek bekler; master dosyaya yönlendirilerek ayrı başlatılıyor.
+- powershell.exe stdin'i tüketir → betikler base64 argümanla gidiyor.
+- Tailscale SSH ilk bağlantıda tarayıcıda onay isteyebilir; bu oturumda onaylı.
+- macOS'ta `timeout` yok; testlerde `perl -e 'alarm N; exec @ARGV' --` kullan.
 
 ## Sıradaki
-1. Kullanıcının Windows PC'siyle gerçek test (ls, get, put, clip).
-2. İlerleme göstergesi, hata mesajlarını iyileştirme.
-3. Ad kesinleşince GitHub deposu açıp yayınlama (kullanıcı onayıyla).
+1. Kullanıcı .app'i açıp arayüzü denesin; hataları düzelt.
+2. İlerleme çubuğu, ekran görüntüsü getirme, menü çubuğu.
+3. Ad kesinleşince GitHub deposu (kullanıcı onayıyla).

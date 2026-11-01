@@ -5,7 +5,7 @@ import AppKit
 @MainActor
 final class Model: ObservableObject {
     @Published var hosts = SSHConfig.hostAliases()
-    @Published var host: String = SSHConfig.hostAliases().first ?? ""
+    @Published var host: String = UserDefaults.standard.string(forKey: "lastHost") ?? SSHConfig.hostAliases().first ?? ""
     @Published var cwd = ""
     @Published var items: [RemoteItem] = []
     @Published var status = "Hazır"
@@ -18,6 +18,7 @@ final class Model: ObservableObject {
     }
 
     func open(_ path: String?) {
+        UserDefaults.standard.set(host, forKey: "lastHost")
         run("Klasör açılıyor…") {
             let r = try await self.sess.list(path)
             self.cwd = r.cwd; self.items = r.items; self.status = "\(r.items.count) öğe"
@@ -26,13 +27,13 @@ final class Model: ObservableObject {
 
     func up() {
         guard !cwd.isEmpty else { return }
-        open((cwd as NSString).deletingLastPathComponent.replacingOccurrences(of: "/", with: "\\"))
+        open((cwd as NSString).deletingLastPathComponent)
     }
 
     func download(_ item: RemoteItem) {
         let dir = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
         run("\(item.name) indiriliyor…") {
-            let u = try await self.sess.download(remote: item.FullName, toDirectory: dir, isDirectory: item.isDirectory)
+            let u = try await self.sess.download(remote: item.path, toDirectory: dir, isDirectory: item.isDirectory)
             self.status = "✓ \(u.lastPathComponent) indirildi, doğrulandı"
             NSWorkspace.shared.activateFileViewerSelecting([u])
         }
@@ -49,27 +50,28 @@ final class Model: ObservableObject {
 
     func pullClipboard() {
         run("Windows panosu alınıyor…") {
+            let pb = NSPasteboard.general
             switch try await self.sess.pullClipboard() {
             case .text(let t):
-                NSPasteboard.general.clearContents(); NSPasteboard.general.setString(t, forType: .string)
+                pb.clearContents(); pb.setString(t, forType: .string)
                 self.status = "✓ Metin Mac panosunda (\(t.count) karakter)"
-            case .image(let u):
-                if let img = NSImage(contentsOf: u) { NSPasteboard.general.clearContents(); NSPasteboard.general.writeObjects([img]) }
-                self.status = "✓ Görsel Mac panosunda (PNG, kayıpsız)"
+            case .image(let png):
+                pb.clearContents(); pb.setData(png, forType: .png)
+                self.status = "✓ Görsel Mac panosunda (PNG, kayıpsız, \(ByteCountFormatter.string(fromByteCount: Int64(png.count), countStyle: .file)))"
+            case .empty: self.status = "Windows panosu boş"
             }
         }
     }
 
     func pushClipboard() {
         run("Mac panosu Windows'a gönderiliyor…") {
-            try await self.sess.pushClipboardText(NSPasteboard.general.string(forType: .string) ?? "")
+            let pb = NSPasteboard.general
+            if let png = pb.data(forType: .png) {
+                try await self.sess.pushClipboardImage(png: png)
+            } else {
+                try await self.sess.pushClipboardText(pb.string(forType: .string) ?? "")
+            }
             self.status = "✓ Windows panosuna gönderildi"
-        }
-    }
-
-    func setupClipboard() {
-        run("Pano yardımcısı kuruluyor…") {
-            try await self.sess.installClipboardAgent(); self.status = "✓ Pano yardımcısı kuruldu"
         }
     }
 
