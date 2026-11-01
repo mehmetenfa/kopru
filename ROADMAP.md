@@ -6,6 +6,10 @@
 - [x] Pano: Windows → Mac (metin, görsel PNG), Mac → Windows (metin)
 - [x] `kopru` CLI (ls/get/put/run/clip)
 
+## v0.3.0 — Yayınlandı
+- [x] Menü çubuğu simgesi + menü (bağlan/kes, pano, durum)
+- [x] Evrensel .app, DMG/ZIP, GitHub sürümü
+
 ## v0.2.1 — Dosya yöneticisi hissi (kodlandı, elle denenmedi)
 - [x] Bağlantıyı kes düğmesi (kalıcı ssh bağlantısı kapanır; uygulama kapanınca da kapanır)
 - [x] Finder gibi çoklu seçim (tıkla, ⌘ tıkla, ⇧ tıkla, ⌘A), çift tıkla/Return klasör aç
@@ -32,7 +36,7 @@
 - [ ] Windows bildirimlerini Mac'e yansıtma
 
 ## v0.4 — Yayın
-- [ ] İmzalı/notarize .dmg, GitHub Releases, Homebrew cask
+- [ ] Apple Developer ID ile imza + notarize (Gatekeeper uyarısı kalksın), Homebrew cask
 - [ ] İngilizce yerelleştirme, README görselleri
 - [ ] Sparkle ile otomatik güncelleme
 

@@ -1,5 +1,12 @@
 # Durum (güncelleme: 2026-11-01)
 
+## Yayın
+- GitHub: https://github.com/mehmetenfa/kopru (herkese açık, hesap: mehmetenfa)
+- Sürüm: v0.3.0 → https://github.com/mehmetenfa/kopru/releases/tag/v0.3.0 (DMG, ZIP, SHA256SUMS; evrensel arm64+x86_64, ad-hoc imzalı, notarize DEĞİL)
+- Yeni sürüm çıkarma: VERSION dosyasını artır → `scripts/make-dmg.sh` → commit/push → `GH_TOKEN=$(gh auth token -u mehmetenfa) gh release create vX.Y.Z dist/* --repo mehmetenfa/kopru`
+- Not: `gh` aktif hesabı misalilim; bu repo için GH_TOKEN ile mehmetenfa kullanılır (global hesap değiştirilmedi).
+- v0.3.0: menü çubuğu simgesi (bağlıyken nokta), pencere kapansa da çalışır, CLI uygulamanın içinde (Contents/Resources/kopru).
+
 ## Şu an
 v0.2.1: dosya listesi AppKit NSTableView'e geçti (çoklu seçim, sürükle-bırak indirme/yükleme, toplu indirme, kayıt yeri seçici, bağlantıyı kes). Derleniyor, uygulama açılıyor, `disconnect` CLI'da gerçek PC ile doğrulandı. **Arayüz etkileşimleri (seçme, sürükleme, panel) henüz elle denenmedi.**
 
