@@ -7,6 +7,10 @@
 - Not: `gh` aktif hesabı misalilim; bu repo için GH_TOKEN ile mehmetenfa kullanılır (global hesap değiştirilmedi).
 - v0.3.0: menü çubuğu simgesi (bağlıyken nokta), pencere kapansa da çalışır, CLI uygulamanın içinde (Contents/Resources/kopru).
 
+## Bekleyen karar (kullanıcı sonra devam edecek)
+Kullanıcı her yönde bağlantı istiyor (Mac/Windows/Linux arası, ör. Windows→Mac, Mac→Linux). Plan ve seçenekler ROADMAP.md'de "PLAN: Her yön" başlığında. Önerim: önce Aşama 1 (Mac uygulaması her hedefe: Windows/WSL, Windows OpenSSH, Mac, Linux), Windows istemcisi ayrı aşama. Devam ederken kullanıcıya Aşama 2 seçeneğini tekrar sor.
+v0.3.1 kodu GitHub'a gönderildi ama **sürüm (release) çıkarılmadı**: yeni bilgisayar rehberindeki Tailscale'siz/sıfırdan kurulum yöntemleri test edilmedi ve arayüz elle denenmedi. Çıkarmak için VERSION=0.3.1 → make-dmg → release.
+
 ## Şu an
 v0.3.1 (yayınlanmadı): cihaz listesi (Device, UserDefaults "devices") + yeni bilgisayar rehberi (NewComputerGuide, ConnectionCheck). 16 birim testi geçiyor; tanılama gerçek PC'de ve hatalı girişlerle (yanlış kullanıcı, olmayan adres, ulaşılamayan IP) CLI ile denendi. Arayüz elle denenmedi. **Tailscale'i sıfırdan kurma ve Tailscale'siz (mirrored/LAN) yöntem hiç test edilmedi**, rehberdeki komutlar belgelere dayanıyor. Yayın için VERSION'ı 0.3.1 yap → make-dmg → release.
 

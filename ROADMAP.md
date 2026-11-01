@@ -6,6 +6,26 @@
 - [x] Pano: Windows → Mac (metin, görsel PNG), Mac → Windows (metin)
 - [x] `kopru` CLI (ls/get/put/run/clip)
 
+## PLAN: Her yön (Mac/Windows/Linux ↔ Mac/Windows/Linux) — kullanıcı istedi, karar bekliyor
+İstenen: Mac→Windows, Windows→Mac, Mac→Linux, Windows→Linux (ve Mac→Mac). Önerilen sıra:
+
+**Aşama 1 — Mac uygulaması, her hedef (v0.4)** ← önerilen ilk adım, tamamı bu Mac'ten test edilebilir
+- [ ] Hedef işletim sistemi algılama (bağlanınca `uname` / `/proc/version`): WSL, Linux, macOS, Windows OpenSSH
+- [ ] Hedef başına komut farkları: listeleme (`find -printf` GNU'ya özgü → macOS'ta `stat -f`), boyut (`du -sb` → macOS'ta `stat`/`du -sk`), boş alan (`df -B1 --output` → macOS `df -k`), doğrulama (`sha256sum` → macOS `shasum -a 256`), pano (macOS `pbcopy/pbpaste`, Linux `xclip/wl-copy`, WSL `powershell.exe`)
+- [ ] Sade Windows OpenSSH hedefi: PowerShell ile listeleme/boyut/hash/pano (WSL'siz Windows)
+- [ ] Rehbere "Mac" (Uzaktan Oturum'u aç) ve "Linux" (openssh-server) seçenekleri; `check` bu hedefleri tanısın
+- [ ] Mac'te ikinci Mac/Linux olmadığı için gerçek test kullanıcıdan istenecek (birim testleri ile mantık sınanır)
+
+**Aşama 2 — Windows istemcisi (Windows'tan Mac/Linux/Windows'a bağlanmak)** — KARAR BEKLİYOR
+Üç seçenek sunuldu, kullanıcı henüz seçmedi ("sonra geliştirelim"):
+1. (önerilen) Önce Aşama 1, Windows uygulaması sonra ayrı aşamada
+2. Tek kod tabanı (Tauri: Rust + web arayüzü), Mac/Win/Linux tek uygulama — SwiftUI uygulaması bırakılır, Windows'ta masaüstüne sürükleyerek indirme zor
+3. Mac uygulaması kalsın + ayrı yerel Windows uygulaması (C#/WinUI) — en çok emek, iki kod tabanı
+Teknik notlar (Windows istemcisi için):
+- Windows 10/11'de `ssh.exe` ve `scp.exe` var ama **rsync yok** → devam etme için rsync'siz motor gerek: indirmede `ssh host "tail -c +N dosya"` ile ofsetten akış, yüklemede uzak boyutu öğrenip `cat >> dosya` ile ekleme (hedef Unix ise); hash iki tarafta hesaplanır
+- Win32-OpenSSH **ControlMaster/ControlPath (unix soket) desteklemez** → her komutta yeni bağlantı; bağlantı havuzu ya da kalıcı tek oturum üzerinden komut çalıştırma gerekir
+- Windows ortamını bu Mac'ten test edemem; kullanıcının Windows PC'sine WSL üzerinden erişim var ama arayüz testi için kullanıcı denemeli
+
 ## v0.3.1 — Cihaz listesi + yeni bilgisayar rehberi (kodlandı, arayüz elle denenmedi; henüz yayınlanmadı)
 - [x] "Yeni bilgisayar ekle" rehberi: Tailscale ya da aynı ağ yöntemi, kopyalanabilir komutlar, bağlantı tanılaması (Türkçe hata açıklamaları), kaydet ve bağlan
 - [x] İlk bağlantıda sunucu anahtarı otomatik kabul (StrictHostKeyChecking=accept-new); `kopru <host> check`
