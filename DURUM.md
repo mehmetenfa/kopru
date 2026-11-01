@@ -3,7 +3,7 @@
 ## Şu an
 v0.2.1: dosya listesi AppKit NSTableView'e geçti (çoklu seçim, sürükle-bırak indirme/yükleme, toplu indirme, kayıt yeri seçici, bağlantıyı kes). Derleniyor, uygulama açılıyor, `disconnect` CLI'da gerçek PC ile doğrulandı. **Arayüz etkileşimleri (seçme, sürükleme, panel) henüz elle denenmedi.**
 
-v0.2 aktarım motoru yazıldı ve gerçek PC'de (`misal_ilim_ve_kltr@misalpc1`, Tailscale SSH → WSL2) doğrulandı. Pencereli uygulama henüz kullanıcı tarafından elle denenmedi.
+v0.2 aktarım motoru yazıldı ve gerçek PC'de (Tailscale SSH ile erişilen, WSL2 içine giren bir Windows PC) doğrulandı. Pencereli uygulama henüz kullanıcı tarafından elle denenmedi.
 
 ## Gerçek PC'de doğrulananlar (CLI ile)
 - Listeleme, pano (metin Windows→Mac), `run`; Türkçe karakterler

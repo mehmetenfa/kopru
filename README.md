@@ -4,28 +4,42 @@
 
 Mac'ten SSH ile bağlandığınız Windows bilgisayardan **kayıpsız ve hızlı** dosya, pano ve komut çıktısı alın. Windows'a ek program kurmak gerekmez. Şu an hedef, SSH ile **WSL2** içine bağlanılan Windows bilgisayarlardır (ör. Tailscale SSH); doğrudan Windows OpenSSH desteği yol haritasında.
 
+## İndir ve kur
+1. [Releases](../../releases/latest) sayfasından `Kopru-x.y.z.dmg` dosyasını indir, aç, **Köprü**'yü Uygulamalar'a sürükle.
+2. İlk açılışta macOS "doğrulanamadı" diyebilir (uygulama Apple ile imzalı/notarize değil). **Sağ tık → Aç → Aç** de ya da terminalde: `xattr -dr com.apple.quarantine /Applications/Köprü.app`
+3. Sunucu kutusuna `kullanıcı@sunucu` yaz (Tailscale kullanıyorsan ör. `ad@pc-adi`) ve **Bağlan**'a bas.
+
+Komut satırı aracı uygulamanın içinde: `ln -s "/Applications/Köprü.app/Contents/Resources/kopru" /usr/local/bin/kopru`
+
 ## Özellikler
-- Windows klasörlerini gezin, dosya/klasör indirin, sürükle-bırak ile yükleyin
-- Her tek dosya SHA-256 ile doğrulanır, bayt bayt aynıdır
-- Windows panosunu Mac'e alın (metin, görseller PNG olarak sıkıştırmasız), Mac panosunu Windows'a gönderin
+- Windows klasörlerini gezin; **Finder gibi çoklu seçim** (⌘, ⇧, ⌘A), çift tıkla klasör aç
+- Seçilenleri **masaüstüne/Finder'a sürükleyin** ya da toplu indirin; kayıt yerini siz seçersiniz
+- Dosyaları pencereye (ya da bir klasörün üstüne) sürükleyip yükleyin
+- Bayt bayt aynı aktarım, isteğe bağlı SHA-256 doğrulama
+- Büyük dosyalar (GB'lar): ilerleme/hız/kalan süre, iptal, otomatik yeniden deneme, **kaldığı yerden devam**, boş alan kontrolü
+- Windows panosunu Mac'e alın (metin, görsel PNG), Mac panosunu Windows'a gönderin
+- **Menü çubuğu simgesi**: bağlantı durumu, pano kısayolları; pencere kapansa da çalışır
 - `kopru` komut satırı: `kopru kullanici@pc run "ls -la" | pbcopy`
 
-## Büyük dosyalar
-GB'larca dosyalar için tasarlandı: ilerleme/hız/kalan süre gösterilir, iptal edilebilir, bağlantı koparsa otomatik yeniden denenir ve yarım kalan aktarım **kaldığı yerden** devam eder (yarım dosya hedef klasörde gizli `.kopru-partial` içinde saklanır). Başlamadan önce iki tarafta boş alan kontrol edilir.
-
 ## Gereksinimler
-- macOS 13+, anahtar tabanlı (parolasız) SSH ile erişilen, WSL2 kurulu bir Windows PC
-- WSL'de `sha256sum` (varsayılan) ve Windows interop açık (varsayılan)
+- macOS 13+ (Apple Silicon ve Intel)
+- Anahtar tabanlı (parolasız) SSH ile erişilen, **WSL2 kurulu** bir Windows PC (ör. Tailscale SSH). Doğrudan Windows OpenSSH desteği yol haritasında.
+- WSL'de `rsync` ve `sha256sum` (genelde hazır gelir), Windows interop açık (varsayılan)
 - Pano için Windows'ta oturum açık olmalı
+- Mac'te hedef klasörde yeterli boş alan (uygulama başta kontrol eder)
+
+## English
+**Köprü** ("bridge") is a native macOS app that lets you browse a Windows PC you reach over SSH (currently via **WSL2**, e.g. Tailscale SSH) and move files and the clipboard **losslessly and fast**: Finder-style multi-select, drag to Desktop, batch download with a destination picker, resumable multi-GB transfers with progress, SHA-256 verification, menu bar icon and a `kopru` CLI. Download the DMG from [Releases](../../releases/latest). The UI is currently Turkish; localization is on the roadmap.
 
 ## Derleme
 ```
 swift build
-scripts/build-app.sh   # build/Köprü.app
+scripts/build-app.sh   # build/Köprü.app (evrensel)
+scripts/make-dmg.sh    # dist/Kopru-x.y.z.dmg
 ```
 
 ## Durum
-Erken aşama (v0.1). Bkz. [ROADMAP.md](ROADMAP.md) ve [DURUM.md](DURUM.md).
+Erken aşama. Bkz. [ROADMAP.md](ROADMAP.md) ve [DURUM.md](DURUM.md). Hata bildirimleri için Issues.
 
 ## Lisans
 MIT

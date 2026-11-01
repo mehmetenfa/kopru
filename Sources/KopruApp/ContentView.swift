@@ -2,7 +2,7 @@ import SwiftUI
 import KopruCore
 
 struct ContentView: View {
-    @StateObject private var m = Model()
+    @EnvironmentObject private var m: Model
 
     var body: some View {
         VStack(spacing: 0) {
@@ -31,7 +31,7 @@ struct ContentView: View {
 
     private var topBar: some View {
         HStack {
-            TextField("kullanıcı@sunucu (ör. ad@misalpc1)", text: $m.host)
+            TextField("kullanıcı@sunucu (ör. ad@pc-adi)", text: $m.host)
                 .textFieldStyle(.roundedBorder).frame(width: 260).disabled(m.connected)
             if !m.hosts.isEmpty && !m.connected {
                 Menu("Kayıtlı") { ForEach(m.hosts, id: \.self) { h in Button(h) { m.host = h } } }.fixedSize()
