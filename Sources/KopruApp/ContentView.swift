@@ -8,6 +8,14 @@ struct ContentView: View {
         VStack(spacing: 0) {
             topBar
             Divider()
+            if m.connected { browser } else { DeviceListView() }
+            Divider()
+            statusBar
+        }
+    }
+
+    private var browser: some View {
+        VStack(spacing: 0) {
             pathBar
             RemoteTable(
                 items: m.items,
@@ -24,8 +32,6 @@ struct ContentView: View {
             )
             Divider()
             downloadBar
-            Divider()
-            statusBar
         }
     }
 
@@ -33,9 +39,7 @@ struct ContentView: View {
         HStack {
             TextField("kullanıcı@sunucu (ör. ad@pc-adi)", text: $m.host)
                 .textFieldStyle(.roundedBorder).frame(width: 260).disabled(m.connected)
-            if !m.hosts.isEmpty && !m.connected {
-                Menu("Kayıtlı") { ForEach(m.hosts, id: \.self) { h in Button(h) { m.host = h } } }.fixedSize()
-            }
+            if m.connected { Text("● \(m.displayName(for: m.host))").font(.headline) }
             if m.connected {
                 Button { m.disconnect() } label: { Label("Bağlantıyı kes", systemImage: "bolt.slash") }
             } else {
@@ -100,4 +104,69 @@ struct ContentView: View {
             Text(m.status).font(.caption).lineLimit(3)
         }.padding(8).frame(maxWidth: .infinity, alignment: .leading)
     }
+}
+
+
+/// Bağlı değilken gösterilir: kaydedilmiş cihazlar ve her birinin yanında "Bağlan" düğmesi.
+struct DeviceListView: View {
+    @EnvironmentObject var m: Model
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 10) {
+                if m.devices.isEmpty && m.suggestions.isEmpty {
+                    VStack(spacing: 8) {
+                        Image(systemName: "desktopcomputer").font(.system(size: 40)).foregroundStyle(.secondary)
+                        Text("Henüz kayıtlı cihaz yok").font(.headline)
+                        Text("Yukarıdaki kutuya kullanıcı@sunucu yaz ve Bağlan'a bas. Bağlandıktan sonra cihaz burada listelenir, bir dahaki sefere tek tıkla bağlanırsın.")
+                            .font(.callout).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                    }.frame(maxWidth: .infinity).padding(.top, 60).padding(.horizontal, 40)
+                }
+                if !m.devices.isEmpty {
+                    Text("Cihazlarım").font(.headline)
+                    ForEach(m.devices) { DeviceRow(device: $0, saved: true) }
+                }
+                if !m.suggestions.isEmpty {
+                    Text("~/.ssh/config içindeki sunucular").font(.headline).padding(.top, 8)
+                    ForEach(m.suggestions) { DeviceRow(device: $0, saved: false) }
+                }
+            }.padding(14)
+        }
+    }
+}
+
+struct DeviceRow: View {
+    @EnvironmentObject var m: Model
+    let device: Device
+    let saved: Bool
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "desktopcomputer").font(.title2).foregroundStyle(Color.accentColor).frame(width: 30)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(device.name).font(.headline)
+                Text(device.host).font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
+                if let d = device.lastConnected {
+                    Text("Son bağlantı: " + Self.relative.localizedString(for: d, relativeTo: Date())).font(.caption2).foregroundStyle(.tertiary)
+                }
+            }
+            Spacer()
+            if saved {
+                Menu {
+                    Button("Yeniden adlandır…") { m.rename(device) }
+                    Button("Listeden sil", role: .destructive) { m.forget(device) }
+                } label: { Image(systemName: "ellipsis.circle") }
+                    .menuStyle(.borderlessButton).fixedSize()
+            }
+            Button { m.connect(to: device) } label: { Label("Bağlan", systemImage: "bolt.fill") }
+                .buttonStyle(.borderedProminent).disabled(m.busy)
+        }
+        .padding(10)
+        .background(RoundedRectangle(cornerRadius: 10).fill(Color(nsColor: .controlBackgroundColor)))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.secondary.opacity(0.2)))
+    }
+
+    private static let relative: RelativeDateTimeFormatter = {
+        let f = RelativeDateTimeFormatter(); f.locale = Locale(identifier: "tr_TR"); f.unitsStyle = .full; return f
+    }()
 }

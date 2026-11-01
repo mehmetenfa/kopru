@@ -6,6 +6,11 @@
 - [x] Pano: Windows → Mac (metin, görsel PNG), Mac → Windows (metin)
 - [x] `kopru` CLI (ls/get/put/run/clip)
 
+## v0.3.1 — Cihaz listesi (kodlandı, elle denenmedi; henüz yayınlanmadı)
+- [x] Bağlanılan cihazlar kendiliğinden kaydedilir; bağlı değilken listede, her birinin yanında "Bağlan" düğmesi
+- [x] Yeniden adlandır / listeden sil; son bağlantı zamanı; ~/.ssh/config sunucuları öneri olarak
+- [x] Menü çubuğundan tek tıkla bağlan
+
 ## v0.3.0 — Yayınlandı
 - [x] Menü çubuğu simgesi + menü (bağlan/kes, pano, durum)
 - [x] Evrensel .app, DMG/ZIP, GitHub sürümü

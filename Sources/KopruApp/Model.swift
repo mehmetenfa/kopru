@@ -4,7 +4,8 @@ import AppKit
 
 @MainActor
 final class Model: ObservableObject {
-    @Published var hosts = SSHConfig.hostAliases()
+    @Published var devices: [Device] = Model.loadDevices()
+    private let sshAliases = SSHConfig.hostAliases()
     @Published var host: String = UserDefaults.standard.string(forKey: "lastHost") ?? SSHConfig.hostAliases().first ?? ""
     @Published var connected = false
     @Published var cwd = ""
@@ -23,6 +24,40 @@ final class Model: ObservableObject {
         return FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0]
     }() {
         didSet { UserDefaults.standard.set(destination.path, forKey: "destination") }
+    }
+
+    /// ~/.ssh/config'te olup henüz kaydedilmemiş sunucular (öneri)
+    var suggestions: [Device] { sshAliases.filter { a in !devices.contains { $0.host == a } }.map { Device(host: $0) } }
+
+    private static func loadDevices() -> [Device] {
+        let d = UserDefaults.standard
+        if let data = d.data(forKey: "devices"), let list = try? JSONDecoder().decode([Device].self, from: data) { return Device.sorted(list) }
+        // eski sürümden: son kullanılan sunucu
+        if let h = d.string(forKey: "lastHost"), !SSHSession.normalizeHost(h).isEmpty { return Device.remembering(h, in: []) }
+        return []
+    }
+    private func saveDevices() {
+        if let data = try? JSONEncoder().encode(devices) { UserDefaults.standard.set(data, forKey: "devices") }
+    }
+
+    func connect(to device: Device) { host = device.host; connect() }
+
+    func forget(_ device: Device) { devices.removeAll { $0.host == device.host }; saveDevices() }
+
+    func rename(_ device: Device) {
+        let alert = NSAlert()
+        alert.messageText = "Cihazı yeniden adlandır"; alert.informativeText = device.host
+        let tf = NSTextField(frame: NSRect(x: 0, y: 0, width: 260, height: 24)); tf.stringValue = device.name
+        alert.accessoryView = tf
+        alert.addButton(withTitle: "Kaydet"); alert.addButton(withTitle: "Vazgeç")
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        let n = tf.stringValue.trimmingCharacters(in: .whitespaces)
+        if !n.isEmpty, let i = devices.firstIndex(where: { $0.host == device.host }) { devices[i].name = n; saveDevices() }
+    }
+
+    func displayName(for host: String) -> String {
+        let h = SSHSession.normalizeHost(host)
+        return devices.first { $0.host == h }?.name ?? Device.defaultName(for: h)
     }
 
     private var cached: SSHSession?
@@ -67,6 +102,7 @@ final class Model: ObservableObject {
         UserDefaults.standard.set(host, forKey: "lastHost")
         run("Bağlanılıyor…") {
             let r = try await self.sess.list(path)
+            if !self.connected { self.devices = Device.remembering(self.host, in: self.devices); self.saveDevices() }
             self.cwd = r.cwd; self.items = r.items; self.connected = true
             self.status = "\(r.items.count) öğe"
         }

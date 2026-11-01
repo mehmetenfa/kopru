@@ -39,3 +39,30 @@ final class EngineTests: XCTestCase {
         XCTAssertEqual(TransferProgress(phase: .transferring, bytesDone: 50, bytesTotal: 100).fraction, 0.5)
     }
 }
+
+final class DeviceTests: XCTestCase {
+    func testDefaultName() {
+        XCTAssertEqual(Device.defaultName(for: "ad@misalpc1"), "misalpc1")
+        XCTAssertEqual(Device.defaultName(for: "win-pc"), "win-pc")
+    }
+    func testRememberAddsMovesToTopAndKeepsName() {
+        let t0 = Date(timeIntervalSince1970: 1000), t1 = Date(timeIntervalSince1970: 2000), t2 = Date(timeIntervalSince1970: 3000)
+        var l = Device.remembering("ssh a@pc1", in: [], now: t0)          // "ssh " temizlenir
+        XCTAssertEqual(l.map(\.host), ["a@pc1"])
+        l = Device.remembering("b@pc2", in: l, now: t1)
+        XCTAssertEqual(l.map(\.host), ["b@pc2", "a@pc1"])
+        l[1].name = "Ofis"                                                // yeniden adlandır
+        l = Device.remembering("a@pc1", in: l, now: t2)
+        XCTAssertEqual(l.map(\.host), ["a@pc1", "b@pc2"])
+        XCTAssertEqual(l[0].name, "Ofis")                                 // ad korunur
+        XCTAssertEqual(l.count, 2)                                        // tekrar eklenmez
+    }
+    func testNeverConnectedSortedLast() {
+        let l = Device.sorted([Device(host: "z"), Device(host: "a", lastConnected: Date()), Device(host: "b")])
+        XCTAssertEqual(l.map(\.host), ["a", "b", "z"])
+    }
+    func testCodableRoundTrip() throws {
+        let d = [Device(host: "a@pc", name: "Ev", lastConnected: Date(timeIntervalSince1970: 5))]
+        XCTAssertEqual(try JSONDecoder().decode([Device].self, from: JSONEncoder().encode(d)), d)
+    }
+}

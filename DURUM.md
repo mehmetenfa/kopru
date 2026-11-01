@@ -8,6 +8,8 @@
 - v0.3.0: menü çubuğu simgesi (bağlıyken nokta), pencere kapansa da çalışır, CLI uygulamanın içinde (Contents/Resources/kopru).
 
 ## Şu an
+v0.3.1 (yayınlanmadı): cihaz listesi eklendi (Device, UserDefaults "devices"). Birim testleri geçiyor; arayüz elle denenmedi. Yayın için VERSION'ı 0.3.1 yap → make-dmg → release.
+
 v0.2.1: dosya listesi AppKit NSTableView'e geçti (çoklu seçim, sürükle-bırak indirme/yükleme, toplu indirme, kayıt yeri seçici, bağlantıyı kes). Derleniyor, uygulama açılıyor, `disconnect` CLI'da gerçek PC ile doğrulandı. **Arayüz etkileşimleri (seçme, sürükleme, panel) henüz elle denenmedi.**
 
 v0.2 aktarım motoru yazıldı ve gerçek PC'de (Tailscale SSH ile erişilen, WSL2 içine giren bir Windows PC) doğrulandı. Pencereli uygulama henüz kullanıcı tarafından elle denenmedi.

@@ -29,7 +29,7 @@ struct MenuContent: View {
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        Text(m.connected ? "● Bağlı: \(SSHSession.normalizeHost(m.host))" : "○ Bağlı değil")
+        Text(m.connected ? "● Bağlı: \(m.displayName(for: m.host))" : "○ Bağlı değil")
         Divider()
         Button("Köprü penceresini aç") {
             openWindow(id: "main"); NSApp.activate(ignoringOtherApps: true)
@@ -39,6 +39,12 @@ struct MenuContent: View {
         } else {
             Button("Bağlan") { m.connect() }
                 .disabled(SSHSession.normalizeHost(m.host).isEmpty || m.busy)
+        }
+        if !m.connected && !m.devices.isEmpty {
+            Divider()
+            ForEach(m.devices.prefix(6)) { d in
+                Button("Bağlan: \(d.name)") { m.connect(to: d) }.disabled(m.busy)
+            }
         }
         Divider()
         Button("Windows panosunu al") { m.pullClipboard() }.disabled(!m.connected || m.busy)
