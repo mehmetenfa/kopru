@@ -109,6 +109,20 @@ public final class SSHSession {
         return out.isEmpty ? "''" : out
     }
 
+    /// Ana bağlantıyı (ControlMaster) kapatır. Çalışan aktarımları önce iptal etmek çağıranın işi.
+    public func disconnect() async {
+        _ = try? await runProcess("/usr/bin/ssh", ["-o", "ControlPath=\(controlPath)", "-O", "exit", host])
+    }
+
+    /// Uygulama kapanırken kullanılır (async beklenemez).
+    public func disconnectBlocking() {
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: "/usr/bin/ssh")
+        p.arguments = ["-o", "ControlPath=\(controlPath)", "-O", "exit", host]
+        p.standardOutput = FileHandle.nullDevice; p.standardError = FileHandle.nullDevice
+        try? p.run(); p.waitUntilExit()
+    }
+
     public func scp(_ args: [String]) async throws {
         try await ensureMaster()
         let r = try await runProcess("/usr/bin/scp", sshOptions + ["-p", "-q"] + args)

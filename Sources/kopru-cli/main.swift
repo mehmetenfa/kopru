@@ -12,6 +12,7 @@ kopru — Mac'ten SSH ile Windows'a kayıpsız erişim
   kopru <host> get <uzak-yol> [hedef]  İndir (devam eder, SHA-256 doğrulamalı, Ctrl-C iptal)
   kopru <host> put <yerel> <uzak-klasör>  Yükle (SHA-256 doğrulamalı)
   kopru <host> run "<bash>"            WSL'de komut çalıştır, çıktısı stdout'a (| pbcopy ile panoya)
+  kopru <host> disconnect              Kalıcı ssh bağlantısını kapat
   kopru <host> clip [pull|push]        Windows panosunu al / Mac panosunu gönder
 """
 
@@ -51,6 +52,8 @@ let mainTask = Task {
         case "run":
             guard let script = rest.first else { fail(usage) }
             FileHandle.standardOutput.write(try await s.sh(script).stdout)
+        case "disconnect":
+            await s.disconnect(); print("✓ bağlantı kesildi")
         case "clip":
             let pb = NSPasteboard.general
             if rest.first == "push" {

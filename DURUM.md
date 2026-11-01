@@ -1,6 +1,8 @@
 # Durum (güncelleme: 2026-11-01)
 
 ## Şu an
+v0.2.1: dosya listesi AppKit NSTableView'e geçti (çoklu seçim, sürükle-bırak indirme/yükleme, toplu indirme, kayıt yeri seçici, bağlantıyı kes). Derleniyor, uygulama açılıyor, `disconnect` CLI'da gerçek PC ile doğrulandı. **Arayüz etkileşimleri (seçme, sürükleme, panel) henüz elle denenmedi.**
+
 v0.2 aktarım motoru yazıldı ve gerçek PC'de (`misal_ilim_ve_kltr@misalpc1`, Tailscale SSH → WSL2) doğrulandı. Pencereli uygulama henüz kullanıcı tarafından elle denenmedi.
 
 ## Gerçek PC'de doğrulananlar (CLI ile)
@@ -24,6 +26,7 @@ v0.2 aktarım motoru yazıldı ve gerçek PC'de (`misal_ilim_ve_kltr@misalpc1`, 
 - `URL.resourceValues` dosya boyutunu önbellekler → `attributesOfItem`.
 - `Process` argümanlarında Unicode ayrışır (ö→o+¨): uzak yollar rsync'e ASCII ($'\ooo') olarak verilir (`shqASCII`).
 - ssh ControlMaster süreci boruları açık tutar → master dosyaya yönlendirilerek ayrı başlatılır; powershell.exe stdin'i tüketir → betikler base64 argümanla.
+- `pgrep -f` Türkçe harfli (Köprü.app) yolu eşleştiremez (NFD): `pgrep -f MacOS/Kopru` kullan.
 - macOS'ta `timeout` yok; `perl -e 'alarm N; exec @ARGV' --` kullan.
 
 ## Sıradaki

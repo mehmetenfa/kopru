@@ -6,6 +6,13 @@
 - [x] Pano: Windows → Mac (metin, görsel PNG), Mac → Windows (metin)
 - [x] `kopru` CLI (ls/get/put/run/clip)
 
+## v0.2.1 — Dosya yöneticisi hissi (kodlandı, elle denenmedi)
+- [x] Bağlantıyı kes düğmesi (kalıcı ssh bağlantısı kapanır; uygulama kapanınca da kapanır)
+- [x] Finder gibi çoklu seçim (tıkla, ⌘ tıkla, ⇧ tıkla, ⌘A), çift tıkla/Return klasör aç
+- [x] Seçilenleri masaüstüne/Finder'a sürükle-bırak (bırakınca indirilir)
+- [x] Seçilenleri toplu indir; kayıt yeri seçimi (Masaüstü/İndirilenler/Belgeler/başka klasör, "her seferinde sor")
+- [x] Sağ tık menüsü; klasörün üstüne dosya bırakınca o klasöre yükle
+
 ## v0.2 — Hız ve güven
 - [x] İlerleme çubuğu + hız + kalan süre, iptal, Mac uykuya geçmesin
 - [x] Kesilen aktarımı sürdürme (rsync --append, ara klasör .kopru-partial), otomatik yeniden deneme (6 deneme)
