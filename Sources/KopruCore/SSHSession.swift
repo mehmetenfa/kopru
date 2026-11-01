@@ -11,7 +11,15 @@ public final class SSHSession {
     let controlPath: String
     static let powershellPath = "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"
 
+    /// "ssh kullanıcı@sunucu" gibi terminal komutu yapıştırılırsa baştaki "ssh " ve boşluklar atılır.
+    public static func normalizeHost(_ raw: String) -> String {
+        var parts = raw.split(whereSeparator: \.isWhitespace).map(String.init)
+        if parts.first == "ssh" { parts.removeFirst() }
+        return parts.last ?? ""
+    }
+
     public init(host: String) {
+        let host = Self.normalizeHost(host)
         self.host = host
         let dir = "/tmp/kopru-ssh-\(getuid())"
         try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true,

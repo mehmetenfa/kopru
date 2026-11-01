@@ -20,7 +20,7 @@ final class Model: ObservableObject {
 
     private var cached: SSHSession?
     private var sess: SSHSession {
-        if let c = cached, c.host == host { return c }
+        if let c = cached, c.host == SSHSession.normalizeHost(host) { return c }
         let n = SSHSession(host: host); cached = n; return n
     }
 

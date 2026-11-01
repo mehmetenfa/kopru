@@ -11,6 +11,11 @@ final class EngineTests: XCTestCase {
         XCTAssertEqual(SSHSession.shqASCII("klasör"), #"'klas'$'\303'$'\266''r'"#)
         XCTAssertTrue(SSHSession.shqASCII("İü şç").allSatisfy { $0.isASCII })
     }
+    func testNormalizeHost() {
+        XCTAssertEqual(SSHSession.normalizeHost("ssh a_b@pc1"), "a_b@pc1")
+        XCTAssertEqual(SSHSession.normalizeHost("  a_b@pc1  "), "a_b@pc1")
+        XCTAssertEqual(SSHSession.normalizeHost("win-pc"), "win-pc")
+    }
     func testUniqueName() {
         let taken: Set<String> = ["a.txt", "a (2).txt", "b"]
         XCTAssertEqual(uniqueName("c.txt") { taken.contains($0) }, "c.txt")
